@@ -1,4 +1,4 @@
-package projects.converter_between_xml_json;
+package aBigProjects.converter_between_xml_json;
 
 
 import java.io.File;

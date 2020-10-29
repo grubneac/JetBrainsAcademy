@@ -1,4 +1,4 @@
-package machine;
+package aBigProjects.machine;
 
 import java.util.Scanner;
 

@@ -25,7 +25,7 @@ public class MultiDimensionalArraySpiral {
         int size = scanner.nextInt();
         arr = new int[size][size];
 
-//        printArr();
+        printArr();
         int counter = 1;
         int maxSize = (int) Math.pow(size, 2);
 
@@ -35,7 +35,7 @@ public class MultiDimensionalArraySpiral {
 
             counter++;
         }
-//        System.out.println("-----------------------");
+        System.out.println("-----------------------");
         printArr();
     }
 
@@ -94,9 +94,9 @@ public class MultiDimensionalArraySpiral {
     }
 
     private static void printArr() {
-        for (int i = 0; i < arr.length; i++) {
+        for (int[] ints : arr) {
             for (int j = 0; j < arr.length; j++) {
-                System.out.print(arr[i][j] + " ");
+                System.out.print(ints[j] + " ");
             }
             System.out.println();
         }

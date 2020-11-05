@@ -12,6 +12,7 @@ that field. The ships can be placed horizontally or vertically but not diagonall
 should not cross or touch each other. The goal is to sink all the ships of the opponent before your opponent
 does this to you.
  */
+
 import java.util.Scanner;
 
 public class Main {
@@ -19,19 +20,9 @@ public class Main {
     public static void main(String[] args) {
 
         BattleField bf = new BattleField();
-        bf.print();
-        int curShip = 0;
-        String error = null;
-        while (curShip < 5) {
-            error = bf.putShipOnField(bf.getShip(curShip), error);
+        bf.placeShips();
+        bf.startBattle();
 
-            if (error == null) {
-                curShip++;
-                bf.print();
-            } else {
-                System.out.println(error);
-            }
-        }
     }
 }
 
@@ -88,6 +79,7 @@ class Point {
         this.col = col;
     }
 
+
     public int getRow() {
         return row;
     }
@@ -99,27 +91,33 @@ class Point {
 
 class BattleField {
     private static final Scanner scanner = new Scanner(System.in);
-    private final int SIZE_FIELD = 10;
-    private final char START_LETTER = 'A';
+    private static final int SIZE_FIELD = 10;
+    public static final int NUM_OF_SHIPS = 5;
+    private static final char START_LETTER = 'A';
+    private static final char MISS = 'M';
+    private static final char SHIP = 'O';
+    private static final char HIT = 'X';
+    private static final char FOG = '~';
     private Ship[] ships;
     private char[][] field;
 
     public BattleField() {
         initField();
         initShips();
+        print();
     }
 
     private void initField() {
         field = new char[SIZE_FIELD][SIZE_FIELD];
         for (int i = 0; i < SIZE_FIELD; i++) {
             for (int j = 0; j < SIZE_FIELD; j++) {
-                field[i][j] = '~';
+                field[i][j] = FOG;
             }
         }
     }
 
     public void initShips() {
-        ships = new Ship[5];
+        ships = new Ship[NUM_OF_SHIPS];
         ships[0] = new Ship("Aircraft Carrier", 5);
         ships[1] = new Ship("Battleship", 4);
         ships[2] = new Ship("Submarine", 3);
@@ -128,7 +126,6 @@ class BattleField {
     }
 
     public void print() {
-        System.out.print(" ");
         for (int i = 1; i <= 10; i++) {
             System.out.print(" " + i);
         }
@@ -204,7 +201,7 @@ class BattleField {
         }
         for (int i = leftRow; i <= rightRow; i++) {
             for (int j = leftCol; j <= rightCol; j++) {
-                field[i][j] = 'O';
+                field[i][j] = SHIP;
 
             }
         }
@@ -260,5 +257,56 @@ class BattleField {
     private int convertToInt(String row) {
         char symbol = row.charAt(0);
         return (int) symbol - (int) START_LETTER;
+    }
+
+    public void placeShips() {
+        int curShip = 0;
+        String error = null;
+        while (curShip < NUM_OF_SHIPS) {
+            error = putShipOnField(getShip(curShip), error);
+
+            if (error == null) {
+                curShip++;
+                print();
+            } else {
+                System.out.println(error);
+            }
+        }
+
+    }
+
+    public void startBattle() {
+        System.out.println("The game starts!");
+        System.out.println();
+        print();
+        hitShip();
+
+    }
+
+    private void hitShip() {
+        System.out.println("Take a shot!");
+        System.out.println();
+        boolean playFlag = true;
+        while (playFlag) {
+            String hitPosition = scanner.nextLine();
+            System.out.println();
+            Point pt = new Point(convertToInt(hitPosition.substring(0, 1)),
+                    Integer.parseInt(hitPosition.substring(1)) - 1);
+            if (pt.getRow() < 0 || pt.getRow() >= SIZE_FIELD || pt.getCol() < 0 || pt.getCol() >= SIZE_FIELD) {
+                System.out.println("Error! You entered the wrong coordinates! Try again:");
+            } else if (field[pt.getRow()][pt.getCol()] == SHIP) {
+                field[pt.getRow()][pt.getCol()] = HIT;
+                print();
+                System.out.println("You hit a ship!");
+                playFlag = false;
+            } else {
+                field[pt.getRow()][pt.getCol()] = MISS;
+                print();
+                System.out.println("You missed!");
+                playFlag = false;
+            }
+
+            System.out.println();
+        }
     }
 }

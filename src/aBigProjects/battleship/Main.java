@@ -140,6 +140,24 @@ class BattleField {
         System.out.println();
     }
 
+    public void printWithFog() {
+        for (int i = 1; i <= 10; i++) {
+            System.out.print(" " + i);
+        }
+        System.out.println();
+        for (int i = 0; i < SIZE_FIELD; i++) {
+            System.out.print((char) (i + (int) START_LETTER));
+            for (int j = 0; j < SIZE_FIELD; j++) {
+                if (field[i][j] != SHIP)
+                    System.out.print(" " + field[i][j]);
+                else
+                    System.out.print(" " + FOG);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
     public Ship getShip(int ind) {
         return ships[ind];
     }
@@ -278,7 +296,7 @@ class BattleField {
     public void startBattle() {
         System.out.println("The game starts!");
         System.out.println();
-        print();
+        printWithFog();
         hitShip();
 
     }
@@ -296,13 +314,15 @@ class BattleField {
                 System.out.println("Error! You entered the wrong coordinates! Try again:");
             } else if (field[pt.getRow()][pt.getCol()] == SHIP) {
                 field[pt.getRow()][pt.getCol()] = HIT;
-                print();
+                printWithFog();
                 System.out.println("You hit a ship!");
+                print();
                 playFlag = false;
             } else {
                 field[pt.getRow()][pt.getCol()] = MISS;
-                print();
+                printWithFog();
                 System.out.println("You missed!");
+                print();
                 playFlag = false;
             }
 

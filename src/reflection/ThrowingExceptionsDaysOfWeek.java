@@ -1,3 +1,5 @@
+package reflection;
+
 import java.util.Scanner;
 /*Your task is to implement the getDayOfWeekName method that converts the number of the day of the week to its short name. If the given number is incorrect, the method should throw IllegalArgumentException.
 

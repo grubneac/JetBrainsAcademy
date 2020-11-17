@@ -13,6 +13,9 @@ should not cross or touch each other. The goal is to sink all the ships of the o
 does this to you.
  */
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
@@ -31,10 +34,12 @@ class Ship {
     private final int shipSize;
     private Point begPos;
     private Point endPos;
+    Map<Point, Character> shipPosition;
 
     public Ship(String name, int shipSize) {
         this.name = name;
         this.shipSize = shipSize;
+        shipPosition = new HashMap<>(shipSize);
     }
 
     public String getName() {
@@ -61,6 +66,22 @@ class Ship {
         this.endPos = endPos;
     }
 
+    public Boolean isDead(Character liveChar) {
+        for (Map.Entry<Point, Character> pointCharacterEntry : shipPosition.entrySet()) {
+            if (pointCharacterEntry.getValue().equals(liveChar))
+                return false;
+        }
+        return true;
+    }
+
+    public void addShipPosition(Point point, Character liveChar) {
+        shipPosition.put(point, liveChar);
+    }
+
+    public void setShipPosition(Point point, Character hitChar) {
+        shipPosition.put(point, hitChar);
+    }
+
     @Override
     public String toString() {
         return "Ship{" +
@@ -79,6 +100,19 @@ class Point {
         this.col = col;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Point point = (Point) o;
+        return row == point.row &&
+                col == point.col;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, col);
+    }
 
     public int getRow() {
         return row;
@@ -126,6 +160,7 @@ class BattleField {
     }
 
     public void print() {
+        System.out.print(" ");
         for (int i = 1; i <= 10; i++) {
             System.out.print(" " + i);
         }
@@ -141,6 +176,7 @@ class BattleField {
     }
 
     public void printWithFog() {
+        System.out.print(" ");
         for (int i = 1; i <= 10; i++) {
             System.out.print(" " + i);
         }
@@ -162,7 +198,7 @@ class BattleField {
         return ships[ind];
     }
 
-    public String putShipOnField(Ship curShip, String error) {
+    public String putShipOnField(Ship curShip, int indexOfShip, String error) {
         if (error == null) {
             System.out.printf("Enter the coordinates of the %s (%d cells):\n"
                     , curShip.getName()
@@ -193,12 +229,12 @@ class BattleField {
         } else if (isTooCloseToAnotherShip(curShip)) { //check too close to another ship
             return "Error! You placed it too close to another one. Try again:";
         } else {
-            installShip(curShip);
+            installShip(curShip, indexOfShip);
             return null;
         }
     }
 
-    private void installShip(Ship curShip) {
+    private void installShip(Ship curShip, int indexOfShip) {
         int leftRow;
         int leftCol;
         int rightRow;
@@ -220,7 +256,7 @@ class BattleField {
         for (int i = leftRow; i <= rightRow; i++) {
             for (int j = leftCol; j <= rightCol; j++) {
                 field[i][j] = SHIP;
-
+                ships[indexOfShip].addShipPosition(new Point(i, j), SHIP);
             }
         }
     }
@@ -281,7 +317,7 @@ class BattleField {
         int curShip = 0;
         String error = null;
         while (curShip < NUM_OF_SHIPS) {
-            error = putShipOnField(getShip(curShip), error);
+            error = putShipOnField(getShip(curShip), curShip, error);
 
             if (error == null) {
                 curShip++;
@@ -312,21 +348,62 @@ class BattleField {
                     Integer.parseInt(hitPosition.substring(1)) - 1);
             if (pt.getRow() < 0 || pt.getRow() >= SIZE_FIELD || pt.getCol() < 0 || pt.getCol() >= SIZE_FIELD) {
                 System.out.println("Error! You entered the wrong coordinates! Try again:");
-            } else if (field[pt.getRow()][pt.getCol()] == SHIP) {
+            } else if (isCellOfShip(new Point(pt.getRow(), pt.getCol()))) {
                 field[pt.getRow()][pt.getCol()] = HIT;
                 printWithFog();
-                System.out.println("You hit a ship!");
-                print();
-                playFlag = false;
+                if (markShipsCellLikeDestroy(new Point(pt.getRow(), pt.getCol()))) {
+                    if (isTheLastShipIsSank()) {
+                        playFlag = false;
+                        System.out.println("You sank the last ship. You won. Congratulations!");
+                    } else {
+                        System.out.println("You sank a ship! Specify a new target:");
+                    }
+                } else
+                    System.out.println("You hit a ship! Try again:");
+//                print();
             } else {
                 field[pt.getRow()][pt.getCol()] = MISS;
                 printWithFog();
-                System.out.println("You missed!");
-                print();
-                playFlag = false;
+                System.out.println("You missed. Try again:");
+//                print();
             }
-
             System.out.println();
         }
+    }
+
+    // all ships sank
+    private boolean isTheLastShipIsSank() {
+        for (int i = 0; i < ships.length; i++) {
+            if (!ships[i].isDead(SHIP))
+                return false;
+        }
+        return true;
+    }
+
+    // mark cell of ship like dead and check is the ship sank
+    private boolean markShipsCellLikeDestroy(Point point) {
+        for (int i = 0; i < ships.length; i++) {
+            for (Point curPoint : ships[i].shipPosition.keySet()) {
+                if (point.equals(curPoint)) {
+                    ships[i].shipPosition.put(curPoint, HIT);
+                    if (ships[i].isDead(SHIP))
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isCellOfShip(Point point) {
+        for (int i = 0; i < ships.length; i++) {
+            for (Point currPoint : ships[i].shipPosition.keySet()) {
+                if (point.equals(currPoint)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

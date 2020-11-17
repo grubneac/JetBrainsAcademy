@@ -78,10 +78,6 @@ class Ship {
         shipPosition.put(point, liveChar);
     }
 
-    public void setShipPosition(Point point, Character hitChar) {
-        shipPosition.put(point, hitChar);
-    }
-
     @Override
     public String toString() {
         return "Ship{" +
@@ -371,10 +367,10 @@ class BattleField {
         }
     }
 
-    // all ships sank
+    // Do all ships sank?
     private boolean isTheLastShipIsSank() {
-        for (int i = 0; i < ships.length; i++) {
-            if (!ships[i].isDead(SHIP))
+        for (Ship ship : ships) {
+            if (!ship.isDead(SHIP))
                 return false;
         }
         return true;
@@ -382,23 +378,21 @@ class BattleField {
 
     // mark cell of ship like dead and check is the ship sank
     private boolean markShipsCellLikeDestroy(Point point) {
-        for (int i = 0; i < ships.length; i++) {
-            for (Point curPoint : ships[i].shipPosition.keySet()) {
+        for (Ship ship : ships) {
+            for (Point curPoint : ship.shipPosition.keySet()) {
                 if (point.equals(curPoint)) {
-                    ships[i].shipPosition.put(curPoint, HIT);
-                    if (ships[i].isDead(SHIP))
-                        return true;
-                    else
-                        return false;
+                    ship.shipPosition.put(curPoint, HIT);
+                    return ship.isDead(SHIP);
                 }
             }
         }
         return false;
     }
 
+    //Is there a ship in this cell?
     private boolean isCellOfShip(Point point) {
-        for (int i = 0; i < ships.length; i++) {
-            for (Point currPoint : ships[i].shipPosition.keySet()) {
+        for (Ship ship : ships) {
+            for (Point currPoint : ship.shipPosition.keySet()) {
                 if (point.equals(currPoint)) {
                     return true;
                 }

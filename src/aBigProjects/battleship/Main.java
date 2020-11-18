@@ -13,6 +13,7 @@ should not cross or touch each other. The goal is to sink all the ships of the o
 does this to you.
  */
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -21,11 +22,90 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        //create two battle fields
+        BattleField bf1 = new BattleField("1");
+        BattleField bf2 = new BattleField("2");
 
-        BattleField bf = new BattleField();
-        bf.placeShips();
-        bf.startBattle();
+        //fill constant position of ships
+/*        String[][] squadron1 = new String[5][2];
+        squadron1[0][0] = "F3";
+        squadron1[0][1] = "F7";
+        squadron1[1][0] = "A1";
+        squadron1[1][1] = "D1";
+        squadron1[2][0] = "J10";
+        squadron1[2][1] = "J8";
+        squadron1[3][0] = "B9";
+        squadron1[3][1] = "D9";
+        squadron1[4][0] = "I2";
+        squadron1[4][1] = "J2";
 
+        String[][] squadron2 = new String[5][2];
+        squadron2[0][0] = "H2";
+        squadron2[0][1] = "H6";
+        squadron2[1][0] = "F3";
+        squadron2[1][1] = "F6";
+        squadron2[2][0] = "H8";
+        squadron2[2][1] = "F8";
+        squadron2[3][0] = "D4";
+        squadron2[3][1] = "D6";
+        squadron2[4][0] = "C8";
+        squadron2[4][1] = "D8";*/
+
+
+        // fill both fields
+        bf1.placeShips(null);
+//        bf1.placeShips(squadron1);
+        promptEnterKey();
+        bf2.placeShips(null);
+//        bf2.placeShips(squadron2);
+
+        //start battle
+        boolean battleGameContinue = true;
+        BattleField currBF = bf2;
+        String opponentName = bf1.getPlayerName();
+
+        while (battleGameContinue) {
+            promptEnterKey();
+            if (currBF.getPlayerName().equals(bf1.getPlayerName()))
+                printBothFields(bf1, bf2);
+            else
+                printBothFields(bf2, bf1);
+
+            // hit to ships
+            currBF.hitShip(opponentName);
+            if (currBF.isTheLastShipIsSank()) {
+                System.out.println("You sank the last ship. You won. Congratulations!");
+                battleGameContinue = false;
+            } else { // change gamers
+                if (currBF.getPlayerName().equals(bf1.getPlayerName())) {
+                    currBF = bf2;
+                    opponentName = bf1.getPlayerName();
+                } else {
+                    currBF = bf1;
+                    opponentName = bf2.getPlayerName();
+                }
+            }
+
+        }
+    }
+
+    private static void printBothFields(BattleField hideBF, BattleField realBF) {
+        hideBF.printWithFog();
+        System.out.println("---------------------");
+        realBF.print();
+        System.out.println();
+    }
+
+    public static void promptEnterKey() {
+        System.out.print("Press Enter and pass the move to another player");
+        try {
+            System.in.read();
+            for (int i = 0; i < 50; i++) {
+                System.out.println();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
@@ -130,11 +210,16 @@ class BattleField {
     private static final char FOG = '~';
     private Ship[] ships;
     private char[][] field;
+    private final String playerName;
 
-    public BattleField() {
+    public BattleField(String thePlayerName) {
+        this.playerName = thePlayerName;
         initField();
         initShips();
-        print();
+    }
+
+    public String getPlayerName() {
+        return playerName;
     }
 
     private void initField() {
@@ -168,7 +253,6 @@ class BattleField {
             }
             System.out.println();
         }
-        System.out.println();
     }
 
     public void printWithFog() {
@@ -187,14 +271,42 @@ class BattleField {
             }
             System.out.println();
         }
-        System.out.println();
     }
 
     public Ship getShip(int ind) {
         return ships[ind];
     }
 
-    public String putShipOnField(Ship curShip, int indexOfShip, String error) {
+    public void placeShips(String[][] squadron) {
+        int curShip = 0;
+        String error = null;
+        System.out.printf("Player %s, place your ships on the game field\n", playerName);
+        System.out.println();
+        print();
+        while (curShip < NUM_OF_SHIPS) {
+            String[] shipPosition;
+            if (squadron == null) { //real game
+                shipPosition = scanForShipPosition(getShip(curShip), error);
+                error = putShipOnField(getShip(curShip), curShip, shipPosition);
+            } else { //for test
+                for (String[] currShip : squadron) {
+                    putShipOnField(getShip(curShip), curShip, currShip);
+                    curShip++;
+                }
+                return;
+            }
+
+            if (error == null) {
+                curShip++;
+                print();
+            } else {
+                System.out.println(error);
+            }
+        }
+
+    }
+
+    private String[] scanForShipPosition(Ship curShip, String error) {
         if (error == null) {
             System.out.printf("Enter the coordinates of the %s (%d cells):\n"
                     , curShip.getName()
@@ -204,6 +316,12 @@ class BattleField {
         System.out.println();
         String[] shipPosition = scanner.nextLine().split("\\s+");
         System.out.println();
+
+        return shipPosition;
+    }
+
+    private String putShipOnField(Ship curShip, int indexOfShip, String[] shipPosition) {
+
 
         curShip.setBegPos(new Point(convertToInt(shipPosition[0].substring(0, 1)), Integer.parseInt(shipPosition[0].substring(1)) - 1));
         curShip.setEndPos(new Point(convertToInt(shipPosition[1].substring(0, 1)), Integer.parseInt(shipPosition[1].substring(1)) - 1));
@@ -309,32 +427,8 @@ class BattleField {
         return (int) symbol - (int) START_LETTER;
     }
 
-    public void placeShips() {
-        int curShip = 0;
-        String error = null;
-        while (curShip < NUM_OF_SHIPS) {
-            error = putShipOnField(getShip(curShip), curShip, error);
-
-            if (error == null) {
-                curShip++;
-                print();
-            } else {
-                System.out.println(error);
-            }
-        }
-
-    }
-
-    public void startBattle() {
-        System.out.println("The game starts!");
-        System.out.println();
-        printWithFog();
-        hitShip();
-
-    }
-
-    private void hitShip() {
-        System.out.println("Take a shot!");
+    public void hitShip(String opponentName) {
+        System.out.printf("Player %s, it's your turn:\n", opponentName);
         System.out.println();
         boolean playFlag = true;
         while (playFlag) {
@@ -346,29 +440,21 @@ class BattleField {
                 System.out.println("Error! You entered the wrong coordinates! Try again:");
             } else if (isCellOfShip(new Point(pt.getRow(), pt.getCol()))) {
                 field[pt.getRow()][pt.getCol()] = HIT;
-                printWithFog();
                 if (markShipsCellLikeDestroy(new Point(pt.getRow(), pt.getCol()))) {
-                    if (isTheLastShipIsSank()) {
-                        playFlag = false;
-                        System.out.println("You sank the last ship. You won. Congratulations!");
-                    } else {
-                        System.out.println("You sank a ship! Specify a new target:");
-                    }
+                    System.out.println("You sank a ship!");
                 } else
-                    System.out.println("You hit a ship! Try again:");
-//                print();
+                    System.out.println("You hit a ship!");
+                playFlag = false;
             } else {
                 field[pt.getRow()][pt.getCol()] = MISS;
-                printWithFog();
-                System.out.println("You missed. Try again:");
-//                print();
+                System.out.println("You missed!");
+                playFlag = false;
             }
-            System.out.println();
         }
     }
 
     // Do all ships sank?
-    private boolean isTheLastShipIsSank() {
+    public boolean isTheLastShipIsSank() {
         for (Ship ship : ships) {
             if (!ship.isDead(SHIP))
                 return false;

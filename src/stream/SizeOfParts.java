@@ -1,4 +1,7 @@
+package stream;
+
 import java.util.Scanner;
+import java.util.stream.IntStream;
 
 /*
 A detector compares the size of parts produced by a machine with the reference standard.
@@ -16,21 +19,13 @@ public class SizeOfParts {
         Scanner scanner = new Scanner(System.in);
 
         int numberOfParts = scanner.nextInt();
+        int[] sizes = new int[3];
+        IntStream.range(0, numberOfParts)
+                .forEach(i -> {
+                    int box = scanner.nextInt();
+                    sizes[box + 1]++;
+                });
 
-        int currSize;
-        int perfect = 0;
-        int larger = 0;
-        int smaller = 0;
-        for (int i = 0; i < numberOfParts; i++) {
-            currSize = scanner.nextInt();
-            if (currSize == 0) {
-                perfect++;
-            } else if (currSize > 0) {
-                larger++;
-            } else {
-                smaller++;
-            }
-        }
-        System.out.println(perfect + " " + larger + " " + smaller);
+        System.out.println(sizes[1] + " " + sizes[2] + " " + sizes[0]);
     }
 }

@@ -1,3 +1,5 @@
+package jUnit;
+
 public class FactorialCalculator {
     public static void main(String[] args) {
         FactorialCalculator fc = new FactorialCalculator();

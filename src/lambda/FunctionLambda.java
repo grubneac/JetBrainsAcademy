@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 public class FunctionLambda {
     private static Function<String, Integer> len= s -> s.length();
+    private static final String hello = "Hello, ";
 
     public static void main(String[] args) {
         FunctionLambda fa = new FunctionLambda();
@@ -18,6 +19,11 @@ public class FunctionLambda {
             }
             return count;
         }, "212 kklj 2323");
+
+        Function<String, String> helloFunction = (name) -> hello + name;
+
+        System.out.println(helloFunction.apply("John"));
+        System.out.println(helloFunction.apply("Anastasia"));
     }
 
 

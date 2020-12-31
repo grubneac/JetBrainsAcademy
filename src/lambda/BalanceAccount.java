@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 
 public class BalanceAccount {
     public static void printFilteredAccounts(List<Account> accounts) {
-        List<Account> nonEmptyAccounts = filter(accounts, a -> a.getBalance() > 0);
-        List<Account> accountsWithTooMuchMoney = filter(accounts, a -> a.getBalance() > 100000000);
+        List<Account> nonEmptyAccounts = filter(accounts, a -> a != null && a.getBalance() > 0);
+        List<Account> accountsWithTooMuchMoney = filter(accounts, a -> a.getBalance() >= 100_000_000 && !a.isLocked());
 
         // Don't change the code below
         nonEmptyAccounts.forEach(a -> System.out.print(a.getNumber() + " "));

@@ -7,7 +7,7 @@ public class Question14 {
     public static void main(String[] args) {
         System.out.println(new One().name);
         System.out.println(new Two().getTwo().get().name);
-
+        System.out.println(new Three().getTwo().flatMap(Two::getTwo).get().name);
 
         /// This not compile
 //        System.out.println(new Three().getTwo().flatMap(Two::getTwo).map(One::getName).orElse("N/A"));
